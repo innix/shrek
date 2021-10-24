@@ -103,30 +103,32 @@ func buildMatcher(args []string) (shrek.MultiMatcher, error) {
 
 		switch len(parts) {
 		case 1:
-			if !isValidMatcherPattern(parts[0]) {
-				return mm, fmt.Errorf("pattern contains invalid chars: %q", parts[0])
+			start := parts[0]
+			if !isValidMatcherPattern(start) {
+				return mm, fmt.Errorf("pattern contains invalid chars: %q", start)
 			}
 
 			mm.Inner = append(mm.Inner, shrek.StartEndMatcher{
-				Start: []byte(parts[0]),
+				Start: []byte(start),
 				End:   nil,
 			})
 
-			LogVerbose("Found filter: starts_with='%s'", parts[0])
+			LogVerbose("Found filter: starts_with='%s'", start)
 		case 2:
-			if !isValidMatcherPattern(parts[0]) {
-				return mm, fmt.Errorf("pattern contains invalid chars: %q", parts[0])
+			start, end := parts[0], parts[1]
+			if !isValidMatcherPattern(start) {
+				return mm, fmt.Errorf("pattern contains invalid chars: %q", start)
 			}
-			if !isValidMatcherPattern(parts[1]) {
-				return mm, fmt.Errorf("pattern contains invalid chars: %q", parts[1])
+			if !isValidMatcherPattern(end) {
+				return mm, fmt.Errorf("pattern contains invalid chars: %q", end)
 			}
 
 			mm.Inner = append(mm.Inner, shrek.StartEndMatcher{
-				Start: []byte(parts[0]),
-				End:   []byte(parts[1]),
+				Start: []byte(start),
+				End:   []byte(end),
 			})
 
-			LogVerbose("Found filter: starts_with='%s', ends_with='%s'", parts[0], parts[1])
+			LogVerbose("Found filter: starts_with='%s', ends_with='%s'", start, end)
 		default:
 			return mm, fmt.Errorf("invalid pattern: %q", pattern)
 		}

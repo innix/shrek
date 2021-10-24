@@ -8,6 +8,7 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"sync"
 
 	"github.com/innix/shrek"
 )
@@ -45,13 +46,11 @@ func main() {
 	defer cancel()
 
 	// Spin up the miners.
-	for i := opts.NumThreads; i > 0; i-- {
-		go func() {
-			if err := mineHostNames(ctx, addrs, m); err != nil && !errors.Is(err, ctx.Err()) {
-				LogError("ERROR: %v", err)
-			}
-		}()
-	}
+	wg := runWorkGroup(opts.NumThreads, func(n int) {
+		if err := mineHostNames(ctx, addrs, m); err != nil && !errors.Is(err, ctx.Err()) {
+			LogError("ERROR: %v", err)
+		}
+	})
 
 	// Loop until the requested number of addresses have been mined.
 	mineForever := opts.NumAddresses == 0
@@ -64,6 +63,9 @@ func main() {
 			LogError("ERROR: Found .onion but could not save it to file system: %v", err)
 		}
 	}
+
+	cancel()
+	wg.Wait()
 }
 
 func buildAppOptions() appOptions {
@@ -141,6 +143,20 @@ func isValidMatcherPattern(v string) bool {
 	return strings.Trim(v, "abcdefghijklmnopqrstuvwxyz234567") == ""
 }
 
+func runWorkGroup(n int, fn func(n int)) *sync.WaitGroup {
+	var wg sync.WaitGroup
+	wg.Add(n)
+
+	for i := 0; i < n; i++ {
+		go func(i int) {
+			defer wg.Done()
+			fn(i)
+		}(i)
+	}
+
+	return &wg
+}
+
 func mineHostNames(ctx context.Context, ch chan<- *shrek.OnionAddress, m shrek.Matcher) error {
 	for ctx.Err() == nil {
 		addr, err := shrek.MineOnionHostName(ctx, nil, m)
@@ -150,8 +166,9 @@ func mineHostNames(ctx context.Context, ch chan<- *shrek.OnionAddress, m shrek.M
 
 		select {
 		case ch <- addr:
+		case <-ctx.Done():
 		default:
-			return nil
+			return errors.New("miner finished early because channel is full")
 		}
 	}
 

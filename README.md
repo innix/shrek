@@ -10,12 +10,14 @@ Shrek is a vanity `.onion` address generator written in Go.
 
 # Usage (CLI)
 
-Shrek compiles to a single binary that can be used on the CLI. To install:
+Shrek compiles to a single binary that can be used on the CLI. To build and install:
 
 ```bash
-# The shrek binary will be installed to $GOPATH/bin
-go install github.com/innix/shrek/cmd/shrek
+go install github.com/innix/shrek/cmd/shrek@latest
 ```
+
+This will place the shrek binary in `$GOPATH/bin`. Alternatively you can grab a static build from
+the [GitHub Releases](https://github.com/innix/shrek/releases) page.
 
 The program takes 1 or more filters as arguments. It only generates v3 addresses.
 

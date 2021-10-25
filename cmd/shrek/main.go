@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"sync"
@@ -115,6 +116,16 @@ func buildAppOptions() appOptions {
 	// Set to default if negative number given for some reason.
 	if opts.NumAddresses < 0 {
 		opts.NumAddresses = 0
+	}
+
+	// Translate save dir to absolute dir. Serves no logical purpose, just improves logging.
+	if !filepath.IsAbs(opts.SaveDirectory) {
+		absd, err := filepath.Abs(opts.SaveDirectory)
+		if err != nil {
+			LogError("ERROR: could not resolve save dir to absolute path: %v", err)
+			os.Exit(1)
+		}
+		opts.SaveDirectory = absd
 	}
 
 	// Non-flag args are patterns.

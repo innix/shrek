@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/oasisprotocol/curve25519-voi v0.0.0-20210908142542-2a44edfcaeb0
+	github.com/spf13/pflag v1.0.5
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
 )
 

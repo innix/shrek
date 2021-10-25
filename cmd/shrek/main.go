@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"flag"
 	"fmt"
 	"os"
 	"runtime"
@@ -11,6 +10,12 @@ import (
 	"sync"
 
 	"github.com/innix/shrek"
+	"github.com/spf13/pflag"
+)
+
+const (
+	appName    = "shrek"
+	appVersion = "0.6.0-beta.1"
 )
 
 type appOptions struct {
@@ -70,14 +75,35 @@ func main() {
 
 func buildAppOptions() appOptions {
 	var opts appOptions
-	flag.BoolVar(&opts.Verbose, "V", false, "Verbose logging (default = false)")
-	flag.StringVar(&opts.SaveDirectory, "d", "", "The directory to save keys in (default = current directory)")
-	flag.IntVar(&opts.NumAddresses, "n", 0, "Number of onion addresses to generate (0/default = unlimited)")
-	flag.IntVar(&opts.NumThreads, "t", 0, "Number of threads to use (0/default = all CPU cores)")
-	flag.Parse()
+	pflag.IntVarP(&opts.NumAddresses, "onions", "n", 0, "`num`ber of onion addresses to generate (default = unlimited)")
+	pflag.StringVarP(&opts.SaveDirectory, "save-directory", "d", "", "`dir`ectory to save keys in (default = current working directory)")
+	pflag.IntVarP(&opts.NumThreads, "threads", "t", 0, "`num`ber of threads to use (default = all CPU cores)")
+	pflag.BoolVarP(&opts.Verbose, "verbose", "V", false, "enable verbose logging")
 
-	if flag.NArg() < 1 {
-		LogError("Usage: %s [COMMAND OPTIONS] <pattern1> [pattern2...]", os.Args[0])
+	var help, version bool
+	pflag.BoolVarP(&help, "help", "h", false, "show this help menu")
+	pflag.BoolVarP(&version, "version", "v", false, "show app version")
+
+	pflag.CommandLine.SortFlags = false
+	pflag.Usage = func() {
+		LogError("Usage:")
+		LogError("  %s [options] filter [more-filters...]", os.Args[0])
+		LogError("")
+		LogError("OPTIONS")
+		pflag.PrintDefaults()
+	}
+	pflag.Parse()
+
+	if version {
+		LogInfo("%s %s", appName, appVersion)
+		os.Exit(0)
+	} else if help {
+		pflag.Usage()
+		os.Exit(0)
+	} else if pflag.NArg() < 1 {
+		LogError("No filters provided.")
+		LogError("")
+		pflag.Usage()
 		os.Exit(2)
 	}
 
@@ -92,7 +118,7 @@ func buildAppOptions() appOptions {
 	}
 
 	// Non-flag args are patterns.
-	opts.Patterns = flag.Args()
+	opts.Patterns = pflag.Args()
 
 	return opts
 }

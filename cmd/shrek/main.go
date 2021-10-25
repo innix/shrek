@@ -25,6 +25,7 @@ type appOptions struct {
 	SaveDirectory string
 	NumThreads    int
 	NoColors      bool
+	Pretty        bool
 	Verbose       bool
 	Patterns      []string
 }
@@ -33,9 +34,8 @@ func main() {
 	opts := buildAppOptions()
 	runtime.GOMAXPROCS(opts.NumThreads + 1) // +1 for main proc.
 
-	if opts.Verbose {
-		LogVerboseEnabled = true
-	}
+	LogVerboseEnabled = opts.Verbose
+	LogPrettyEnabled = opts.Pretty
 	color.NoColor = opts.NoColors
 
 	m, err := buildMatcher(opts.Patterns)
@@ -44,20 +44,21 @@ func main() {
 		os.Exit(2)
 	}
 
+	LogInfo("%sSaving found addresses to: '%s'", Pretty("📁 "), color.YellowString("%s", opts.SaveDirectory))
+	LogInfo("")
 	addrText := color.GreenString("%d", opts.NumAddresses)
 	if opts.NumAddresses == 0 {
 		addrText = color.GreenString("infinite")
 	}
-	LogInfo("Searching for %s addresses, using %s threads, with %s filters.",
+	LogInfo("%sStarting search for %s addresses, using %s threads, with %s filters:",
+		Pretty("🔥 "),
 		addrText,
 		color.GreenString("%d", opts.NumThreads),
 		color.GreenString("%d", len(m.Inner)),
 	)
-	LogInfo("Saving found addresses to: '%s'", color.YellowString("%s", opts.SaveDirectory))
-	LogInfo("")
 	defer func() {
 		LogInfo("")
-		LogInfo("Shrek has finished mining.")
+		LogInfo("%sShrek has finished mining.", Pretty("👍 "))
 	}()
 
 	// Channel to receive onion addresses from miners.
@@ -79,7 +80,7 @@ func main() {
 		addr := <-addrs
 		hostname := addr.HostNameString()
 
-		LogInfo(hostname)
+		LogInfo("%s%s", Pretty("   🔹 "), hostname)
 		if err := shrek.SaveOnionAddress(opts.SaveDirectory, addr); err != nil {
 			LogError("ERROR: found .onion but could not save it to file system: %v", err)
 		}
@@ -95,6 +96,7 @@ func buildAppOptions() appOptions {
 	pflag.StringVarP(&opts.SaveDirectory, "save-dir", "d", "", "`dir`ectory to save addresses in (default = cwd)")
 	pflag.IntVarP(&opts.NumThreads, "threads", "t", 0, "`num`ber of threads to use (default = all CPU cores)")
 	pflag.BoolVarP(&opts.NoColors, "no-colors", "", false, "disable colored console output")
+	pflag.BoolVarP(&opts.Pretty, "pretty", "", false, "enable enhanced console output with emoji's")
 	pflag.BoolVarP(&opts.Verbose, "verbose", "V", false, "enable verbose logging")
 
 	var help, version bool
@@ -168,7 +170,7 @@ func buildMatcher(args []string) (shrek.MultiMatcher, error) {
 				End:   nil,
 			})
 
-			LogVerbose("Found filter: starts_with='%s'", color.YellowString("%s", start))
+			LogVerbose("%sFound valid filter: starts_with='%s'", Pretty("✔️ "), color.YellowString("%s", start))
 		case 2:
 			start, end := parts[0], parts[1]
 			if !isValidMatcherPattern(start) {
@@ -183,7 +185,8 @@ func buildMatcher(args []string) (shrek.MultiMatcher, error) {
 				End:   []byte(end),
 			})
 
-			LogVerbose("Found filter: starts_with='%s', ends_with='%s'",
+			LogVerbose("%sFound valid filter: starts_with='%s', ends_with='%s'",
+				Pretty("✔️ "),
 				color.YellowString("%s", start),
 				color.YellowString("%s", end),
 			)

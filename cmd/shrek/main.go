@@ -193,8 +193,6 @@ func mineHostNames(ctx context.Context, ch chan<- *shrek.OnionAddress, m shrek.M
 		select {
 		case ch <- addr:
 		case <-ctx.Done():
-		default:
-			return errors.New("miner finished early because channel is full")
 		}
 	}
 

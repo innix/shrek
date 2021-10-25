@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/fatih/color"
 	"github.com/innix/shrek"
 	"github.com/spf13/pflag"
 )
@@ -20,10 +21,11 @@ const (
 )
 
 type appOptions struct {
-	Verbose       bool
-	SaveDirectory string
 	NumAddresses  int
+	SaveDirectory string
 	NumThreads    int
+	NoColors      bool
+	Verbose       bool
 	Patterns      []string
 }
 
@@ -34,6 +36,7 @@ func main() {
 	if opts.Verbose {
 		LogVerboseEnabled = true
 	}
+	color.NoColor = opts.NoColors
 
 	m, err := buildMatcher(opts.Patterns)
 	if err != nil {
@@ -41,9 +44,21 @@ func main() {
 		os.Exit(2)
 	}
 
-	LogInfo("Searching for %d addresses, using %d threads, with %d filters.",
-		opts.NumAddresses, opts.NumThreads, len(m.Inner))
+	addrText := color.GreenString("%d", opts.NumAddresses)
+	if opts.NumAddresses == 0 {
+		addrText = color.GreenString("infinite")
+	}
+	LogInfo("Searching for %s addresses, using %s threads, with %s filters.",
+		addrText,
+		color.GreenString("%d", opts.NumThreads),
+		color.GreenString("%d", len(m.Inner)),
+	)
+	LogInfo("Saving found addresses to: '%s'", color.YellowString("%s", opts.SaveDirectory))
 	LogInfo("")
+	defer func() {
+		LogInfo("")
+		LogInfo("Shrek has finished mining.")
+	}()
 
 	// Channel to receive onion addresses from miners.
 	addrs := make(chan *shrek.OnionAddress, opts.NumAddresses)
@@ -66,7 +81,7 @@ func main() {
 
 		LogInfo(hostname)
 		if err := shrek.SaveOnionAddress(opts.SaveDirectory, addr); err != nil {
-			LogError("ERROR: Found .onion but could not save it to file system: %v", err)
+			LogError("ERROR: found .onion but could not save it to file system: %v", err)
 		}
 	}
 
@@ -76,9 +91,10 @@ func main() {
 
 func buildAppOptions() appOptions {
 	var opts appOptions
-	pflag.IntVarP(&opts.NumAddresses, "onions", "n", 0, "`num`ber of onion addresses to generate (default = unlimited)")
-	pflag.StringVarP(&opts.SaveDirectory, "save-directory", "d", "", "`dir`ectory to save keys in (default = current working directory)")
+	pflag.IntVarP(&opts.NumAddresses, "onions", "n", 0, "`num`ber of onion addresses to generate (default = infinite)")
+	pflag.StringVarP(&opts.SaveDirectory, "save-dir", "d", "", "`dir`ectory to save addresses in (default = cwd)")
 	pflag.IntVarP(&opts.NumThreads, "threads", "t", 0, "`num`ber of threads to use (default = all CPU cores)")
+	pflag.BoolVarP(&opts.NoColors, "no-colors", "", false, "disable colored console output")
 	pflag.BoolVarP(&opts.Verbose, "verbose", "V", false, "enable verbose logging")
 
 	var help, version bool
@@ -88,7 +104,7 @@ func buildAppOptions() appOptions {
 	pflag.CommandLine.SortFlags = false
 	pflag.Usage = func() {
 		LogError("Usage:")
-		LogError("  %s [options] filter [more-filters...]", os.Args[0])
+		LogError("  %s [options] filter [more-filters...]", filepath.Base(os.Args[0]))
 		LogError("")
 		LogError("OPTIONS")
 		pflag.PrintDefaults()
@@ -152,7 +168,7 @@ func buildMatcher(args []string) (shrek.MultiMatcher, error) {
 				End:   nil,
 			})
 
-			LogVerbose("Found filter: starts_with='%s'", start)
+			LogVerbose("Found filter: starts_with='%s'", color.YellowString("%s", start))
 		case 2:
 			start, end := parts[0], parts[1]
 			if !isValidMatcherPattern(start) {
@@ -167,7 +183,10 @@ func buildMatcher(args []string) (shrek.MultiMatcher, error) {
 				End:   []byte(end),
 			})
 
-			LogVerbose("Found filter: starts_with='%s', ends_with='%s'", start, end)
+			LogVerbose("Found filter: starts_with='%s', ends_with='%s'",
+				color.YellowString("%s", start),
+				color.YellowString("%s", end),
+			)
 		default:
 			return mm, fmt.Errorf("invalid pattern: %q", pattern)
 		}

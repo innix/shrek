@@ -17,7 +17,7 @@ import (
 
 const (
 	appName    = "shrek"
-	appVersion = "0.6.0-beta.1"
+	appVersion = "0.6.0-beta.2"
 )
 
 type appOptions struct {

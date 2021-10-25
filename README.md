@@ -2,9 +2,11 @@
 
 # Shrek <img src="./assets/onion-icon.png" alt=":onion:" title=":onion:" class="emoji" height="20">
 
-[![Go Reference](https://img.shields.io/badge/-reference-007d9c?style=for-the-badge&logo=go&labelColor=5c5c5c&logoColor=ffffff)](https://pkg.go.dev/github.com/innix/shrek) &nbsp;
-[![GitHub Release](https://img.shields.io/github/v/release/innix/shrek?display_name=tag&sort=semver&style=for-the-badge)](https://github.com/innix/shrek/releases) &nbsp;
-[![Project License](https://img.shields.io/github/license/innix/shrek?style=for-the-badge)](LICENSE) &nbsp;
+[![Go Reference   ][goref-badge]][goref-page]&nbsp;
+[![GitHub Release ][ghrel-badge]][ghrel-page]&nbsp;
+[![Project License][licen-badge]][licen-page]&nbsp;
+<!-- [![Go Report      ][gorep-badge]][gorep-page]&nbsp; -->
+<!-- [![Go Version     ][gover-badge]][gover-page]&nbsp; -->
 
 Shrek is a vanity `.onion` address generator written in Go.
 
@@ -120,3 +122,20 @@ Onions have layers, ogres have layers.
 # License
 
 Shrek is distributed under the terms of the MIT License (see [LICENSE](LICENSE)).
+
+
+<!-- Link refs -->
+[goref-badge]: <https://img.shields.io/badge/-reference-007d9c?style=for-the-badge&logo=go&labelColor=5c5c5c&logoColor=ffffff> "Go pkg.dev badge"
+[goref-page]: <https://pkg.go.dev/github.com/innix/shrek> "Go pkg.dev"
+
+[ghrel-badge]: <https://img.shields.io/github/v/release/innix/shrek?display_name=tag&sort=semver&style=for-the-badge> "GitHub Releases badge"
+[ghrel-page]: <https://github.com/innix/shrek/releases> "GitHub Releases"
+
+[gorep-badge]: <https://goreportcard.com/badge/github.com/innix/shrek?style=for-the-badge&logo=go> "Go Report badge"
+[gorep-page]: <https://goreportcard.com/report/github.com/innix/shrek> "Go Report"
+
+[gover-badge]: <https://img.shields.io/github/go-mod/go-version/innix/shrek?style=for-the-badge&logo=go> "Go Version badge"
+[gover-page]: <go.mod> "Go Version"
+
+[licen-badge]: <https://img.shields.io/github/license/innix/shrek?style=for-the-badge> "Project License badge"
+[licen-page]: <LICENSE> "Project License"

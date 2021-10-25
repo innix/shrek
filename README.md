@@ -2,6 +2,10 @@
 
 # Shrek <img src="./assets/onion-icon.png" alt=":onion:" title=":onion:" class="emoji" height="20">
 
+[![Go Reference](https://img.shields.io/badge/-reference-007d9c?style=for-the-badge&logo=go&labelColor=5c5c5c&logoColor=ffffff)](https://pkg.go.dev/github.com/innix/shrek) &nbsp;
+[![GitHub Release](https://img.shields.io/github/v/release/innix/shrek?display_name=tag&sort=semver&style=for-the-badge)](https://github.com/innix/shrek/releases) &nbsp;
+[![Project License](https://img.shields.io/github/license/innix/shrek?style=for-the-badge)](LICENSE) &nbsp;
+
 Shrek is a vanity `.onion` address generator written in Go.
 
 ![Shrek running from CLI](/assets/shrek-zsh.png)

@@ -4,12 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"sync"
+	"time"
 
+	"github.com/briandowns/spinner"
 	"github.com/fatih/color"
 	"github.com/innix/shrek"
 	"github.com/spf13/pflag"
@@ -17,26 +20,22 @@ import (
 
 const (
 	appName    = "shrek"
-	appVersion = "0.6.0-beta.2"
+	appVersion = "0.6.0"
 )
-
-type appOptions struct {
-	NumAddresses  int
-	SaveDirectory string
-	NumThreads    int
-	NoColors      bool
-	Pretty        bool
-	Verbose       bool
-	Patterns      []string
-}
 
 func main() {
 	opts := buildAppOptions()
 	runtime.GOMAXPROCS(opts.NumThreads + 1) // +1 for main proc.
 
-	LogVerboseEnabled = opts.Verbose
-	LogPrettyEnabled = opts.Pretty
-	color.NoColor = opts.NoColors
+	LogVerboseEnabled = true
+	LogPrettyEnabled = opts.Formatting.UseEnhanced()
+	color.NoColor = !opts.Formatting.UseColors()
+
+	LogInfo("%sSaving found addresses to %s",
+		Pretty("📁 ", ""),
+		color.YellowString("%s", opts.SaveDirectory),
+	)
+	LogInfo("")
 
 	m, err := buildMatcher(opts.Patterns)
 	if err != nil {
@@ -44,21 +43,19 @@ func main() {
 		os.Exit(2)
 	}
 
-	LogInfo("%sSaving found addresses to: '%s'", Pretty("📁 "), color.YellowString("%s", opts.SaveDirectory))
-	LogInfo("")
 	addrText := color.GreenString("%d", opts.NumAddresses)
 	if opts.NumAddresses == 0 {
 		addrText = color.GreenString("infinite")
 	}
-	LogInfo("%sStarting search for %s addresses, using %s threads, with %s filters:",
-		Pretty("🔥 "),
+	LogInfo("%sSearching for %s addresses, using %s threads, with %s search filters:",
+		Pretty("🔥 ", ""),
 		addrText,
 		color.GreenString("%d", opts.NumThreads),
 		color.GreenString("%d", len(m.Inner)),
 	)
 	defer func() {
 		LogInfo("")
-		LogInfo("%sShrek has finished mining.", Pretty("👍 "))
+		LogInfo("%sShrek has finished searching.", Pretty("👍 ", ""))
 	}()
 
 	// Channel to receive onion addresses from miners.
@@ -76,11 +73,14 @@ func main() {
 
 	// Loop until the requested number of addresses have been mined.
 	mineForever := opts.NumAddresses == 0
+	ps := newProgressSpinner("   ", time.Millisecond*130)
 	for i := 0; i < opts.NumAddresses || mineForever; i++ {
+		ps.Start()
 		addr := <-addrs
 		hostname := addr.HostNameString()
+		ps.Stop()
 
-		LogInfo("%s%s", Pretty("   🔹 "), hostname)
+		LogInfo("%s%s", Pretty("   🔹 ", ""), hostname)
 		if err := shrek.SaveOnionAddress(opts.SaveDirectory, addr); err != nil {
 			LogError("ERROR: found .onion but could not save it to file system: %v", err)
 		}
@@ -92,12 +92,11 @@ func main() {
 
 func buildAppOptions() appOptions {
 	var opts appOptions
-	pflag.IntVarP(&opts.NumAddresses, "onions", "n", 0, "`num`ber of onion addresses to generate (default = infinite)")
+
+	pflag.IntVarP(&opts.NumAddresses, "onions", "n", 0, "`num`ber of onion addresses to generate, 0 = infinite (default = 1)")
 	pflag.StringVarP(&opts.SaveDirectory, "save-dir", "d", "", "`dir`ectory to save addresses in (default = cwd)")
 	pflag.IntVarP(&opts.NumThreads, "threads", "t", 0, "`num`ber of threads to use (default = all CPU cores)")
-	pflag.BoolVarP(&opts.NoColors, "no-colors", "", false, "disable colored console output")
-	pflag.BoolVarP(&opts.Pretty, "pretty", "", false, "enable enhanced console output with emoji's")
-	pflag.BoolVarP(&opts.Verbose, "verbose", "V", false, "enable verbose logging")
+	pflag.VarP(&opts.Formatting, "format", "", "what `kind` of formatting to use (basic, colored, enhanced, default = all)")
 
 	var help, version bool
 	pflag.BoolVarP(&help, "help", "h", false, "show this help menu")
@@ -113,8 +112,16 @@ func buildAppOptions() appOptions {
 	}
 	pflag.Parse()
 
+	// Set non-zero defaults here to prevent pflag from printing the default values itself.
+	// It can't be disabled and we want to print it differently from how pflag does it.
+	if f := pflag.Lookup("onions"); !f.Changed {
+		if err := f.Value.Set("1"); err != nil {
+			panic(err)
+		}
+	}
+
 	if version {
-		LogInfo("%s %s", appName, appVersion)
+		LogInfo("%s %s, os: %s, arch: %s", appName, appVersion, runtime.GOOS, runtime.GOARCH)
 		os.Exit(0)
 	} else if help {
 		pflag.Usage()
@@ -154,6 +161,7 @@ func buildAppOptions() appOptions {
 
 func buildMatcher(args []string) (shrek.MultiMatcher, error) {
 	var mm shrek.MultiMatcher
+	var inner []shrek.StartEndMatcher
 
 	for _, pattern := range args {
 		parts := strings.Split(pattern, ":")
@@ -165,12 +173,10 @@ func buildMatcher(args []string) (shrek.MultiMatcher, error) {
 				return mm, fmt.Errorf("pattern contains invalid chars: %q", start)
 			}
 
-			mm.Inner = append(mm.Inner, shrek.StartEndMatcher{
+			inner = append(inner, shrek.StartEndMatcher{
 				Start: []byte(start),
 				End:   nil,
 			})
-
-			LogVerbose("%sFound valid filter: starts_with='%s'", Pretty("✔️ "), color.YellowString("%s", start))
 		case 2:
 			start, end := parts[0], parts[1]
 			if !isValidMatcherPattern(start) {
@@ -180,20 +186,35 @@ func buildMatcher(args []string) (shrek.MultiMatcher, error) {
 				return mm, fmt.Errorf("pattern contains invalid chars: %q", end)
 			}
 
-			mm.Inner = append(mm.Inner, shrek.StartEndMatcher{
+			inner = append(inner, shrek.StartEndMatcher{
 				Start: []byte(start),
 				End:   []byte(end),
 			})
-
-			LogVerbose("%sFound valid filter: starts_with='%s', ends_with='%s'",
-				Pretty("✔️ "),
-				color.YellowString("%s", start),
-				color.YellowString("%s", end),
-			)
 		default:
 			return mm, fmt.Errorf("invalid pattern: %q", pattern)
 		}
 	}
+
+	LogVerbose("%sLooking for addresses that match any of these conditions:", Pretty("🔎 ", ""))
+	for _, m := range inner {
+		startsWith := fmt.Sprintf("'%s'", color.YellowString("%s", m.Start))
+		endsWith := fmt.Sprintf("'%s'", color.YellowString("%s", m.End))
+		if len(m.Start) == 0 {
+			startsWith = color.YellowString("anything")
+		}
+		if len(m.End) == 0 {
+			endsWith = color.YellowString("anything")
+		}
+
+		LogVerbose("%sAn address that starts with %s and ends with %s",
+			Pretty("   🔸 ", " - "),
+			startsWith,
+			endsWith,
+		)
+
+		mm.Inner = append(mm.Inner, m)
+	}
+	LogVerbose("")
 
 	return mm, nil
 }
@@ -230,4 +251,20 @@ func mineHostNames(ctx context.Context, ch chan<- *shrek.OnionAddress, m shrek.M
 	}
 
 	return ctx.Err()
+}
+
+func newProgressSpinner(prefix string, speed time.Duration) *spinner.Spinner {
+	s := spinner.New(spinner.CharSets[14], speed)
+	s.HideCursor = true
+	s.Prefix = prefix
+	s.Suffix = " "
+	s.Writer = os.Stderr
+
+	if !LogPrettyEnabled {
+		s.Delay = time.Second * 30
+		s.HideCursor = false
+		s.Writer = io.Discard
+	}
+
+	return s
 }

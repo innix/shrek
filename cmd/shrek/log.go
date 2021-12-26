@@ -24,9 +24,9 @@ func LogVerbose(format string, a ...interface{}) {
 	}
 }
 
-func Pretty(text string) string {
+func Pretty(text, alt string) string {
 	if LogPrettyEnabled {
 		return text
 	}
-	return ""
+	return alt
 }

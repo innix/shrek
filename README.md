@@ -10,7 +10,7 @@
 
 Shrek is a vanity `.onion` address generator written in Go.
 
-![Shrek running from CLI](/assets/shrek-zsh.png)
+![Shrek running from CLI](./assets/shrek-session.webp)
 
 </div>
 

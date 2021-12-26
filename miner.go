@@ -16,7 +16,7 @@ func MineOnionHostName(ctx context.Context, rand io.Reader, m Matcher) (*OnionAd
 		}
 
 		// The approximate encoder only generates the first 51 bytes of the hostname accurately;
-		// the last 5 bytes are wrong. But it is much faster so it is used first then the exact
+		// the last 5 bytes are wrong. But it is much faster, so it is used first then the exact
 		// encoder is used if a match is found here.
 		addr.HostNameApprox(hostname)
 
@@ -25,7 +25,7 @@ func MineOnionHostName(ctx context.Context, rand io.Reader, m Matcher) (*OnionAd
 			continue
 		}
 
-		// Generate full hostname so we can check for exact match. Generating the full address
+		// Generate full hostname, so we can check for exact match. Generating the full address
 		// on every iteration is avoided because it's much slower than the approx.
 		addr.HostName(hostname)
 

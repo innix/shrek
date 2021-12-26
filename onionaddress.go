@@ -15,10 +15,12 @@ import (
 )
 
 const (
-	// EncodedPublicKeyApproxSize is the size, in bytes, of the public key when encoded using the approximate encoder.
+	// EncodedPublicKeyApproxSize is the size, in bytes, of the public key when
+	// encoded using the approximate encoder.
 	EncodedPublicKeyApproxSize = 51
 
-	// EncodedPublicKeySize is the size, in bytes, of the public key when encoded using the real encoder.
+	// EncodedPublicKeySize is the size, in bytes, of the public key when encoded
+	// using the real encoder.
 	EncodedPublicKeySize = 56
 )
 
@@ -29,11 +31,13 @@ type OnionAddress struct {
 	SecretKey ed25519.PrivateKey
 }
 
+// HostName returns the .onion address representation of the public key stored in
+// the OnionAddress. The .onion TLD is not included.
 func (addr *OnionAddress) HostName(hostname []byte) {
 	const version = 3
 
-	if len(hostname) != EncodedPublicKeySize {
-		panic(fmt.Sprintf("Hostname buffer must have len of %d", EncodedPublicKeySize))
+	if l := len(hostname); l != EncodedPublicKeySize {
+		panic(fmt.Sprintf("bad buffer length: %d", l))
 	}
 
 	// checksum = sha3_sum256(".onion checksum" + public_key + version)
@@ -52,6 +56,9 @@ func (addr *OnionAddress) HostName(hostname []byte) {
 	b32.Encode(hostname, onionAddrBuf.Bytes())
 }
 
+// HostNameString returns the .onion address representation of the public key stored
+// in the OnionAddress as a string. Unlike HostName and HostNameApprox, this method
+// does include the .onion TLD in the returned hostname.
 func (addr *OnionAddress) HostNameString() string {
 	hostname := make([]byte, EncodedPublicKeySize)
 	addr.HostName(hostname)
@@ -59,9 +66,12 @@ func (addr *OnionAddress) HostNameString() string {
 	return fmt.Sprintf("%s.onion", hostname)
 }
 
+// HostNameApprox returns an approximate .onion address representation of the public
+// key stored in the OnionAddress. The start of the address is accurate, the last few
+// characters at the end are not. The .onion TLD is not included.
 func (addr *OnionAddress) HostNameApprox(hostname []byte) {
-	if len(hostname) != EncodedPublicKeySize {
-		panic(fmt.Sprintf("Hostname buffer must have len of %d", EncodedPublicKeySize))
+	if l := len(hostname); l != EncodedPublicKeySize {
+		panic(fmt.Sprintf("bad buffer length: %d", l))
 	}
 
 	b32.Encode(hostname, addr.PublicKey)
@@ -91,6 +101,15 @@ func GenerateOnionAddressSlow(rand io.Reader) (*OnionAddress, error) {
 	}, nil
 }
 
+// SaveOnionAddress saves the hostname, public key, and secret key from the given
+// OnionAddress to the destination directory. It creates a sub-directory named after
+// the hostname in the destination directory, then it creates 3 files inside the
+// created sub-directory:
+//
+//   hs_ed25519_public_key
+//   hs_ed25519_secret_key
+//   hostname
+//
 func SaveOnionAddress(dir string, addr *OnionAddress) error {
 	const (
 		dirMode  = 0o700

@@ -55,7 +55,7 @@ func TestStartEndMatcher_MatchApprox(t *testing.T) {
 func TestStartEndMatcher_Match(t *testing.T) {
 	t.Parallel()
 
-	input := "abcdyjsviqu5fqvqzv5mnfonrapka477vonf6fuko7duolp5g3i"
+	const input = "abcdyjsviqu5fqvqzv5mnfonrapka477vonf6fuko7duolp5g3i"
 	table := []struct {
 		Input string
 		Start string

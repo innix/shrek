@@ -22,7 +22,7 @@ const (
 	EncodedPublicKeySize = 56
 )
 
-var b32 = base32.NewEncoding("abcdefghijklmnopqrstuvwxyz234567")
+var b32 = base32.NewEncoding("abcdefghijklmnopqrstuvwxyz234567").WithPadding(base32.NoPadding)
 
 type OnionAddress struct {
 	PublicKey ed25519.PublicKey

@@ -150,25 +150,6 @@ func TestGenerateOnionAddress(t *testing.T) {
 	}
 }
 
-func TestGenerateOnionAddressSlow(t *testing.T) {
-	t.Parallel()
-
-	// Perform several iterations to ensure function is stateless and deterministic.
-	for i := 0; i < 3; i++ {
-		addr, err := shrek.GenerateOnionAddressSlow(bytes.NewBufferString(seed))
-		if err != nil {
-			t.Fatalf("Could not generate the prerequisite onion address: %v", err)
-		}
-
-		if !bytes.Equal(addr.PublicKey, seedPublicKey) {
-			t.Errorf("Unexpected public key, got: %v, wanted: %v", addr.PublicKey, seedPublicKey)
-		}
-		if !bytes.Equal(addr.SecretKey, seedSecretKey) {
-			t.Errorf("Unexpected secret key, got: %v, wanted: %v", addr.SecretKey, seedSecretKey)
-		}
-	}
-}
-
 func BenchmarkOnionAddress_HostName(b *testing.B) {
 	addr, err := shrek.GenerateOnionAddress(bytes.NewBufferString(seed))
 	if err != nil {
@@ -198,15 +179,6 @@ func BenchmarkOnionAddress_HostNameApprox(b *testing.B) {
 func BenchmarkGenerateOnionAddress(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		_, err := shrek.GenerateOnionAddress(nil)
-		if err != nil {
-			b.Fatal(err)
-		}
-	}
-}
-
-func BenchmarkGenerateOnionAddressSlow(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		_, err := shrek.GenerateOnionAddressSlow(nil)
 		if err != nil {
 			b.Fatal(err)
 		}

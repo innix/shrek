@@ -2,15 +2,13 @@ package shrek
 
 import (
 	"bytes"
-	"crypto/ed25519"
-	"crypto/sha512"
 	"encoding/base32"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 
-	ed25519voi "github.com/oasisprotocol/curve25519-voi/primitives/ed25519"
+	"github.com/innix/shrek/internal/ed25519"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -78,26 +76,14 @@ func (addr *OnionAddress) HostNameApprox(hostname []byte) {
 }
 
 func GenerateOnionAddress(rand io.Reader) (*OnionAddress, error) {
-	publicKey, secretKey, err := ed25519voi.GenerateKey(rand)
+	kp, err := ed25519.GenerateKey(rand)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not generate key pair: %w", err)
 	}
 
 	return &OnionAddress{
-		PublicKey: ed25519.PublicKey(publicKey),
-		SecretKey: ed25519.PrivateKey(secretKey),
-	}, nil
-}
-
-func GenerateOnionAddressSlow(rand io.Reader) (*OnionAddress, error) {
-	publicKey, secretKey, err := ed25519.GenerateKey(rand)
-	if err != nil {
-		return nil, err
-	}
-
-	return &OnionAddress{
-		PublicKey: publicKey,
-		SecretKey: secretKey,
+		PublicKey: kp.PublicKey,
+		SecretKey: kp.PrivateKey,
 	}, nil
 }
 
@@ -130,9 +116,8 @@ func SaveOnionAddress(dir string, addr *OnionAddress) error {
 		return fmt.Errorf("could not save public key to file: %w", err)
 	}
 
-	sk := expandSecretKey(addr.SecretKey)
 	skFile := filepath.Join(dir, "hs_ed25519_secret_key")
-	skData := append([]byte("== ed25519v1-secret: type0 ==\x00\x00\x00"), sk[:]...)
+	skData := append([]byte("== ed25519v1-secret: type0 ==\x00\x00\x00"), addr.SecretKey...)
 	if err := os.WriteFile(skFile, skData, fileMode); err != nil {
 		return fmt.Errorf("could not save secret key to file: %w", err)
 	}
@@ -144,13 +129,4 @@ func SaveOnionAddress(dir string, addr *OnionAddress) error {
 	}
 
 	return nil
-}
-
-func expandSecretKey(secretKey ed25519.PrivateKey) [64]byte {
-	h := sha512.Sum512(secretKey[:32])
-	h[0] &= 248
-	h[31] &= 127
-	h[31] |= 64
-
-	return h
 }

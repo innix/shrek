@@ -4,20 +4,21 @@ import (
 	"github.com/oasisprotocol/curve25519-voi/curve/scalar"
 )
 
-func scalarAdd(dst *scalar.Scalar, v uint64) error {
+func scalarAdd(dst *scalar.Scalar, v uint64) {
 	var dstb [32]byte
 
+	// Can't access scalar bytes publicly, so use ToBytes and SetBits.
+	// Kinda slows things down, but have no other choice.
+
 	if err := dst.ToBytes(dstb[:]); err != nil {
-		return err
+		panic(err)
 	}
 
 	scalarAddBytes(&dstb, v)
 
 	if _, err := dst.SetBits(dstb[:]); err != nil {
-		return err
+		panic(err)
 	}
-
-	return nil
 }
 
 func scalarAddBytes(dst *[32]byte, v uint64) {

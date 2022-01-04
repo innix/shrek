@@ -14,12 +14,12 @@ func MineOnionHostName(ctx context.Context, rand io.Reader, m Matcher) (*OnionAd
 
 	it, err := ed25519.NewKeyIterator(rand)
 	if err != nil {
-		return nil, fmt.Errorf("could not create key iterator: %w", err)
+		return nil, fmt.Errorf("shrek: could not create key iterator: %w", err)
 	}
 
 	for more := true; ctx.Err() == nil; more = it.Next() {
 		if !more {
-			return nil, errors.New("searched entire address space and no match was found")
+			return nil, errors.New("shrek: searched entire address space and no match was found")
 		}
 
 		addr := &OnionAddress{
@@ -52,14 +52,14 @@ func MineOnionHostName(ctx context.Context, rand io.Reader, m Matcher) (*OnionAd
 		// Compute private key after a match has been found.
 		sk, err := it.PrivateKey()
 		if err != nil {
-			return nil, fmt.Errorf("could not compute private key: %w", err)
+			return nil, fmt.Errorf("shrek: could not compute private key: %w", err)
 		}
 		addr.SecretKey = sk
 
 		// Sanity check keys retrieved from iterator.
 		kp := &ed25519.KeyPair{PublicKey: addr.PublicKey, PrivateKey: addr.SecretKey}
 		if err := kp.Validate(); err != nil {
-			return nil, fmt.Errorf("key validation failed: %w", err)
+			return nil, fmt.Errorf("shrek: key validation failed: %w", err)
 		}
 
 		return addr, nil

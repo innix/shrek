@@ -42,11 +42,11 @@ type KeyPair struct {
 func (kp *KeyPair) Validate() error {
 	pk, err := getPublicKeyFromPrivateKey(kp.PrivateKey)
 	if err != nil {
-		return fmt.Errorf("could not compute public key from private key: %w", err)
+		return fmt.Errorf("ed25519: could not compute public key from private key: %w", err)
 	}
 
 	if !bytes.Equal(kp.PublicKey, pk) {
-		return errors.New("keys do not match")
+		return errors.New("ed25519: keys do not match")
 	}
 
 	return nil
@@ -59,7 +59,7 @@ func GenerateKey(rand io.Reader) (*KeyPair, error) {
 
 	seed := make([]byte, SeedSize)
 	if _, err := io.ReadFull(rand, seed); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("ed25519: could not read seed: %w", err)
 	}
 
 	sk := make([]byte, PrivateKeySize)
@@ -69,7 +69,7 @@ func GenerateKey(rand io.Reader) (*KeyPair, error) {
 	// need to compute it instead.
 	pk, err := getPublicKeyFromPrivateKey(sk)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("ed25519: could not compute public key from private key: %w", err)
 	}
 
 	return &KeyPair{

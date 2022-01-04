@@ -78,7 +78,7 @@ func (addr *OnionAddress) HostNameApprox(hostname []byte) {
 func GenerateOnionAddress(rand io.Reader) (*OnionAddress, error) {
 	kp, err := ed25519.GenerateKey(rand)
 	if err != nil {
-		return nil, fmt.Errorf("could not generate key pair: %w", err)
+		return nil, fmt.Errorf("shrek: could not generate onion address: %w", err)
 	}
 
 	return &OnionAddress{
@@ -106,26 +106,26 @@ func SaveOnionAddress(dir string, addr *OnionAddress) error {
 	dir = filepath.Join(dir, hostname)
 
 	if err := os.MkdirAll(dir, dirMode); err != nil {
-		return fmt.Errorf("could not create directories: %w", err)
+		return fmt.Errorf("shrek: could not create directories: %w", err)
 	}
 
 	pk := addr.PublicKey
 	pkFile := filepath.Join(dir, "hs_ed25519_public_key")
 	pkData := append([]byte("== ed25519v1-public: type0 ==\x00\x00\x00"), pk...)
 	if err := os.WriteFile(pkFile, pkData, fileMode); err != nil {
-		return fmt.Errorf("could not save public key to file: %w", err)
+		return fmt.Errorf("shrek: could not save public key to file: %w", err)
 	}
 
 	skFile := filepath.Join(dir, "hs_ed25519_secret_key")
 	skData := append([]byte("== ed25519v1-secret: type0 ==\x00\x00\x00"), addr.SecretKey...)
 	if err := os.WriteFile(skFile, skData, fileMode); err != nil {
-		return fmt.Errorf("could not save secret key to file: %w", err)
+		return fmt.Errorf("shrek: could not save secret key to file: %w", err)
 	}
 
 	hnFile := filepath.Join(dir, "hostname")
 	hnData := []byte(hostname)
 	if err := os.WriteFile(hnFile, hnData, fileMode); err != nil {
-		return fmt.Errorf("could not save onion hostname to file: %w", err)
+		return fmt.Errorf("shrek: could not save onion hostname to file: %w", err)
 	}
 
 	return nil

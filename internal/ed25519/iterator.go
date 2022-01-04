@@ -61,14 +61,12 @@ func (it *keyIterator) PrivateKey() (PrivateKey, error) {
 	sc := scalar.New().Set(it.sc)
 
 	if it.counter > 0 {
-		if err := scalarAdd(sc, it.counter); err != nil {
-			return nil, err
-		}
+		scalarAdd(sc, it.counter)
 	}
 
 	sk := make([]byte, PrivateKeySize)
 	if err := sc.ToBytes(sk[:scalar.ScalarSize]); err != nil {
-		return nil, fmt.Errorf("could not pack scalar into byte array: %w", err)
+		panic(err)
 	}
 	copy(sk[scalar.ScalarSize:], it.kp.PrivateKey[scalar.ScalarSize:])
 
@@ -89,17 +87,17 @@ func (it *keyIterator) init(rand io.Reader) (*KeyPair, error) {
 	// Parse private key.
 	sk, err := scalar.NewFromBits(kp.PrivateKey[:scalar.ScalarSize])
 	if err != nil {
-		return nil, fmt.Errorf("could not parse scalar from private key: %w", err)
+		return nil, fmt.Errorf("ed25519: could not parse scalar from private key: %w", err)
 	}
 
 	// Parse public key.
 	cpt, err := curve.NewCompressedEdwardsYFromBytes(kp.PublicKey)
 	if err != nil {
-		return nil, fmt.Errorf("could not parse point from public key: %w", err)
+		return nil, fmt.Errorf("ed25519: could not parse point from public key: %w", err)
 	}
 	pk := curve.NewEdwardsPoint()
 	if _, err := pk.SetCompressedY(cpt); err != nil {
-		return nil, fmt.Errorf("could not decompress point from public key: %w", err)
+		return nil, fmt.Errorf("ed25519: could not decompress point from public key: %w", err)
 	}
 
 	// Cache data so it can be used later.

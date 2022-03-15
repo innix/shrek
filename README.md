@@ -97,7 +97,7 @@ func main() {
 # In active development
 
 This project is under active development and hasn't reached `v1.0` yet. Therefore the public
-API is not fully stable and may contain breaking changes when a new version is released. If
+API is not fully stable and may contain breaking changes as new versions are released. If
 you're using Shrek as a package in your code and an update breaks it, feel free to open an
 issue and a contributor will help you out.
 
@@ -128,6 +128,46 @@ point supporting them. There are no plans to add it as a feature.
 Sure. Use the `--format basic` flag when running the program to keep things simple. You
 can also run `shrek --help` to see a list of all possible formatting options; maybe you'll
 find one you like.
+
+## How do I use a generated address with the `cretz/bine` Tor library?
+
+You need to convert Shrek's `OnionAddress` into Bine's `KeyPair`:
+<details>
+  <summary>Click to expand code</summary>
+
+```go
+package main
+
+import (
+    "github.com/cretz/bine/tor"
+    "github.com/cretz/bine/torutil/ed25519"
+    "github.com/innix/shrek"
+)
+
+func main() {
+    // Generate any address, the value doesn't matter for this demo.
+    addr, err := shrek.GenerateOnionAddress(nil)
+    if err != nil {
+        panic(err)
+    }
+
+    // Or read a previously generated address that was saved to disk with SaveOnionAddress.
+    // addr, err := shrek.ReadOnionAddress("./addrs/bqyql3bq532kzihcmp3c6lb6id.onion/")
+    // if err != nil {
+    //     panic(err)
+    // }
+
+    // Take the private key from Shrek's OnionAddress and turn it into an ed25519.KeyPair
+    // that the Bine library can understand.
+    keyPair := ed25519.PrivateKey(addr.SecretKey).KeyPair()
+
+    // Now you can use the KeyPair in Bine as you normally would, e.g. with ListenConf.
+    listenConf := &tor.ListenConf{
+        Key: keyPair,
+    }
+}
+```
+</details>
 
 ## Why "Shrek"?
 

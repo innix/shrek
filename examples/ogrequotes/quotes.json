@@ -1,0 +1,58 @@
+[
+    [
+        {"speaker": "Shrek", "line": "Here's a newsflash for you. Whether your parents like it or not... I <i><b>am</b></i> an ogre."}
+    ],
+
+    [
+        {"speaker": "Waiter", "line": "Bon Appétit!"},
+        {"speaker": "Donkey", "line": "Oooh, Mexican food! My favorite."}
+    ],
+
+    [
+        {"speaker": "Duloc singing toys", "line": "<pre>"},
+        {"speaker": "", "line": "Welcome to Duloc, such a perfect town"},
+        {"speaker": "", "line": "Here we have some rules, let us lay them down"},
+        {"speaker": "", "line": "Don't make waves, stay in line"},
+        {"speaker": "", "line": "And we'll get along fine"},
+        {"speaker": "", "line": "Duloc is a perfect place"},
+        {"speaker": "", "line": "Keep your feet off the grass"},
+        {"speaker": "", "line": "Shine your shoes, wipe your... face"},
+        {"speaker": "", "line": "Duloc is, Duloc is"},
+        {"speaker": "", "line": "Duloc is a perfect place</pre>"}
+    ],
+
+    [
+        {"speaker": "Shrek", "line": "Ogres... are like onions!"},
+        {"speaker": "Donkey", "line": "<i>*sniff*</i> They stink?"},
+        {"speaker": "Shrek", "line": "No!"},
+        {"speaker": "Donkey", "line": "Oh, they make you cry."},
+        {"speaker": "Shrek", "line": "Noo!"},
+        {"speaker": "Donkey", "line": "Ohhh, you leave them out in the Sun and they get all brown and start sprouting little white hairs."},
+        {"speaker": "Shrek", "line": "NOO!! Layers! Onions have layers, ogres have layers. You get it? We both have layers. <i>*sighs heavily*</i>"}
+    ],
+
+    [
+        {"speaker": "Donkey", "line": "Pheww! Who'd wana live in a place like <i>that</i>?"},
+        {"speaker": "Shrek", "line": "<i>That...</i> would be my home."},
+        {"speaker": "Donkey", "line": "Oh, and it is lovely! Just beautiful. You are quite a decorator. I like that boulder. That is a nice boulder."}
+    ],
+
+    [
+        {"speaker": "Shrek", "line": "Why are you following me?"},
+        {"speaker": "Donkey", "line": "<i>*sings*</i> 'Cause I'm all aloooone. There's no one heeere beside me. My problems have all gone. There's no one to derideeee me. But you gotta have faaaiii-"},
+        {"speaker": "Shrek", "line": "<i>*interrupts, shouting*</i> STOP SINGING! Well, it's no wonder you don't have any friends."},
+        {"speaker": "Donkey", "line": "Wow! Only a true friend would be that truly honest."}
+    ],
+
+    [
+        {"speaker": "Shrek", "line": "Listen, little donkey. Take a look at me. What am I?"},
+        {"speaker": "Donkey", "line": "Uhhh, really tall?"},
+        {"speaker": "Shrek", "line": "NO! I'm an ogre! You know, 'grab your torch and pitchforks'. Doesn't that bother you?"},
+        {"speaker": "Donkey", "line": "<i>*shakes head with smile*</i> Nope."},
+        {"speaker": "Shrek", "line": "Really?"},
+        {"speaker": "Donkey", "line": "Really, really."},
+        {"speaker": "Shrek", "line": "Oh."},
+        {"speaker": "Donkey", "line": "Man, I like you. What's your name?"},
+        {"speaker": "Shrek", "line": "...Shrek."}
+    ]
+]

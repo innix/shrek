@@ -94,6 +94,9 @@ func main() {
 }
 ```
 
+More comprehensive examples of how to use Shrek as a library can be found in
+the [examples](./examples) directory.
+
 # In active development
 
 This project is under active development and hasn't reached `v1.0` yet. Therefore the public
@@ -131,9 +134,13 @@ find one you like.
 
 ## How do I use a generated address with the `cretz/bine` Tor library?
 
-You need to convert Shrek's `OnionAddress` into Bine's `KeyPair`:
+There are [example projects](./examples) that show how to use Shrek and Bine together.
+
+But to put it simply, all you need to do is convert Shrek's `OnionAddress` into Bine's
+`KeyPair`. See this code example:
+
 <details>
-  <summary>Click to expand code</summary>
+  <summary>Click to expand answer</summary>
 
 ```go
 package main
@@ -161,7 +168,7 @@ func main() {
     // that the Bine library can understand.
     keyPair := ed25519.PrivateKey(addr.SecretKey).KeyPair()
 
-    // Now you can use the KeyPair in Bine as you normally would, e.g. with ListenConf.
+    // Now you can use the KeyPair in Bine as you normally would, e.g. with ListenConf:
     listenConf := &tor.ListenConf{
         Key: keyPair,
     }

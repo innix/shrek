@@ -39,7 +39,7 @@ func main() {
 
 	m, err := buildMatcher(opts.Patterns)
 	if err != nil {
-		LogError("ERROR: invalid args: %v", err)
+		LogError("%s: Could not build search filters: %v.", color.RedString("Error"), err)
 		os.Exit(2)
 	}
 
@@ -67,7 +67,7 @@ func main() {
 	// Spin up the miners.
 	wg := runWorkGroup(opts.NumThreads, func(n int) {
 		if err := mineHostNames(ctx, addrs, m); err != nil && !errors.Is(err, ctx.Err()) {
-			LogError("ERROR: %v", err)
+			LogError("%s: %v.", color.RedString("Error"), err)
 		}
 	})
 
@@ -82,7 +82,10 @@ func main() {
 
 		LogInfo("%s%s", Pretty("   🔹 ", ""), hostname)
 		if err := shrek.SaveOnionAddress(opts.SaveDirectory, addr); err != nil {
-			LogError("ERROR: found .onion but could not save it to file system: %v", err)
+			LogError("%s: Found .onion but could not save it to file system: %v.",
+				color.RedString("Error"),
+				err,
+			)
 		}
 	}
 
@@ -147,7 +150,10 @@ func buildAppOptions() appOptions {
 	if !filepath.IsAbs(opts.SaveDirectory) {
 		absd, err := filepath.Abs(opts.SaveDirectory)
 		if err != nil {
-			LogError("ERROR: could not resolve save dir to absolute path: %v", err)
+			LogError("%s: Could not resolve save dir to absolute path: %v.",
+				color.RedString("Error"),
+				err,
+			)
 			os.Exit(1)
 		}
 		opts.SaveDirectory = absd
@@ -174,7 +180,9 @@ func buildMatcher(args []string) (shrek.MultiMatcher, error) {
 				End:   nil,
 			}
 			if err := m.Validate(); err != nil {
-				return mm, fmt.Errorf("pattern '%s:' is not valid: %w", start, err)
+				return mm, fmt.Errorf(
+					"pattern '%s' is not valid: %w", color.YellowString("%s", pattern), err,
+				)
 			}
 			inner = append(inner, m)
 		case 2:
@@ -184,11 +192,15 @@ func buildMatcher(args []string) (shrek.MultiMatcher, error) {
 				End:   []byte(end),
 			}
 			if err := m.Validate(); err != nil {
-				return mm, fmt.Errorf("pattern '%s:%s' is not valid: %w", start, end, err)
+				return mm, fmt.Errorf(
+					"pattern '%s' is not valid: %w", color.YellowString("%s", pattern), err,
+				)
 			}
 			inner = append(inner, m)
 		default:
-			return mm, fmt.Errorf("invalid pattern: %q", pattern)
+			return mm, fmt.Errorf(
+				"pattern '%s' is not a valid syntax", color.YellowString("%s", pattern),
+			)
 		}
 	}
 

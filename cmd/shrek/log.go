@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 )
 
 var (
@@ -11,6 +12,13 @@ var (
 )
 
 func LogError(format string, a ...interface{}) {
+	// Remove "shrek: " from error messages before outputting them.
+	for i, v := range a {
+		if err, ok := v.(error); ok && err != nil {
+			a[i] = strings.ReplaceAll(err.Error(), "shrek: ", "")
+		}
+	}
+
 	_, _ = fmt.Fprintln(os.Stderr, fmt.Sprintf(format, a...))
 }
 

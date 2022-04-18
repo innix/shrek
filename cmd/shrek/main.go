@@ -169,27 +169,24 @@ func buildMatcher(args []string) (shrek.MultiMatcher, error) {
 		switch len(parts) {
 		case 1:
 			start := parts[0]
-			if !isValidMatcherPattern(start) {
-				return mm, fmt.Errorf("pattern contains invalid chars: %q", start)
-			}
-
-			inner = append(inner, shrek.StartEndMatcher{
+			m := shrek.StartEndMatcher{
 				Start: []byte(start),
 				End:   nil,
-			})
+			}
+			if err := m.Validate(); err != nil {
+				return mm, fmt.Errorf("pattern '%s:' is not valid: %w", start, err)
+			}
+			inner = append(inner, m)
 		case 2:
 			start, end := parts[0], parts[1]
-			if !isValidMatcherPattern(start) {
-				return mm, fmt.Errorf("pattern contains invalid chars: %q", start)
-			}
-			if !isValidMatcherPattern(end) {
-				return mm, fmt.Errorf("pattern contains invalid chars: %q", end)
-			}
-
-			inner = append(inner, shrek.StartEndMatcher{
+			m := shrek.StartEndMatcher{
 				Start: []byte(start),
 				End:   []byte(end),
-			})
+			}
+			if err := m.Validate(); err != nil {
+				return mm, fmt.Errorf("pattern '%s:%s' is not valid: %w", start, end, err)
+			}
+			inner = append(inner, m)
 		default:
 			return mm, fmt.Errorf("invalid pattern: %q", pattern)
 		}
@@ -217,10 +214,6 @@ func buildMatcher(args []string) (shrek.MultiMatcher, error) {
 	LogVerbose("")
 
 	return mm, nil
-}
-
-func isValidMatcherPattern(v string) bool {
-	return strings.Trim(v, "abcdefghijklmnopqrstuvwxyz234567") == ""
 }
 
 func runWorkGroup(n int, fn func(n int)) *sync.WaitGroup {

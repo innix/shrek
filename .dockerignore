@@ -1,0 +1,15 @@
+**/.dockerignore
+**/.env
+**/.git
+**/.gitattributes
+**/.gitignore
+**/.idea
+**/.vscode
+**/bin
+**/build
+**/deploy
+**/docker-compose*
+**/Dockerfile*
+**/releases
+assets
+examples

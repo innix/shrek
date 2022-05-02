@@ -57,6 +57,58 @@ To see full usage, use the help flag `-h`:
 shrek -h
 ```
 
+# Running in Docker
+
+[![Docker Hub][dkhub-badge]][dkhub-page]
+
+You can run Shrek in Docker by pulling a pre-built image from [Docker Hub][dkhub-page]
+or by building an image locally.
+
+## Option 1: Pull image from Docker Hub
+
+There's no need to run `docker pull` directly, because `docker run` will automatically
+download the image from Docker Hub if it isn't found locally. So you can save a step
+and run Shrek with a one-liner:
+
+```bash
+docker run --rm -it \
+    -v "$PWD/generated":/app/generated \
+    innix/shrek:latest \
+    -n 3 food:ad barn:yd
+```
+
+## Option 2: Build image locally
+
+Build the Docker image locally using the [`Dockerfile`](Dockerfile):
+
+```bash
+docker build -t shrek:latest .
+```
+
+Then run a new container using the locally built image:
+
+```bash
+docker run --rm -it \
+    -v "$PWD/generated":/app/generated \
+    shrek:latest \
+    -n 3 food:ad barn:yd
+```
+
+## How does the `docker run` command work with Shrek?
+
+When running Shrek in a container, you pass arguments to it by placing them at the
+very end of the `docker run` command. In the example commands above, the arguments
+`-n 3 food:ad barn:yd` are passed to the Shrek binary.
+
+The Docker image configures Shrek to save found `.onion` addresses to the directory
+`/app/generated/` in the container's file system. To access that directory from the
+host, you need to create a shared volume using Docker's `-v` argument. In the above
+examples, the `-v` argument will allow the host to access the container's directory
+by browsing to `$PWD/generated`.
+
+If you're getting a permission error when trying to access the `generated` directory
+on the host, take a look at [this FAQ][docker-access-dir-faq].
+
 # Using Shrek as a library
 
 You can use Shrek as a library in your Go code. Add it to your `go.mod` file by running
@@ -181,6 +233,17 @@ func main() {
 ```
 </details>
 
+## Why can't I access the `generated` directory created by the Docker container?
+
+If the directory (or any of the sub-directories) were created by the Shrek process
+running in the Docker container, they will be owned by the `root` user that is running
+the Shrek process. You need to change ownership of the directory back to your user,
+which can be done by running the [`chown`][chown.1-page] command:
+
+```bash
+sudo chown -R $USER "$PWD/generated"
+```
+
 ## Why "Shrek"?
 
 Onions have layers, ogres have layers.
@@ -209,5 +272,11 @@ Shrek is distributed under the terms of the MIT License (see [LICENSE](LICENSE))
 [licen-badge]: <https://img.shields.io/github/license/innix/shrek?style=for-the-badge>
 [licen-page]: <LICENSE> "Project License"
 
+[dkhub-badge]: <https://img.shields.io/docker/v/innix/shrek?color=2496ed&label=Docker%20Hub&logo=docker&style=for-the-badge>
+[dkhub-page]: <https://hub.docker.com/r/innix/shrek> "innix/shrek - Docker Hub page"
+
 [mkp224o-page]: <https://github.com/cathugger/mkp224o> "cathugger/mkp224o - GitHub page"
 [ghbine-page]: <https://github.com/cretz/bine/> "cretz/bine - GitHub page"
+[chown.1-page]: <https://linux.die.net/man/1/chown> "chown(1) - Linux man page"
+
+[docker-access-dir-faq]: <#why-cant-i-access-the-generated-directory-created-by-the-docker-container> "Why can't I access the generated directory created by the Docker container?"

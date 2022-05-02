@@ -1,6 +1,6 @@
 <div align="center">
 
-# Shrek <img src="./assets/onion-icon.png" alt=":onion:" title=":onion:" class="emoji" height="20">
+# Shrek <img src="./assets/onion-icon.png" alt=":onion:" title=":onion:" height="20">
 
 [![Go Reference   ][goref-badge]][goref-page]&nbsp;
 [![GitHub Release ][ghrel-badge]][ghrel-page]&nbsp;
@@ -16,18 +16,22 @@ Runs on Linux, macOS, Windows, and more. A single static binary with no dependen
 
 </div>
 
-# Usage (CLI)
+# Install
 
-Shrek compiles to a single binary that can be used on the CLI. Download a pre-compiled
-build from the [GitHub Releases][ghrel-page] page. Or build it from source:
+You can download a pre-compiled build from the [GitHub Releases][ghrel-page] page.
+
+Or you can build it from source:
 
 ```bash
 go install github.com/innix/shrek/cmd/shrek@latest
 ```
 
-This will place the compiled shrek binary in `$GOPATH/bin`.
+This will place the compiled Shrek binary in your `$GOPATH/bin` directory.
 
-The program takes 1 or more filters as arguments. It only generates v3 `.onion` addresses.
+# Getting started
+
+Shrek is a single binary that is normally used via the CLI. The program takes 1 or
+more filters as arguments.
 
 ```bash
 # Generate an address that starts with "food":
@@ -53,7 +57,7 @@ To see full usage, use the help flag `-h`:
 shrek -h
 ```
 
-# Usage (library)
+# Using Shrek as a library
 
 You can use Shrek as a library in your Go code. Add it to your `go.mod` file by running
 this in your project root:
@@ -94,8 +98,8 @@ func main() {
 }
 ```
 
-More comprehensive examples of how to use Shrek as a library can be found in
-the [examples](./examples) directory.
+More comprehensive examples of how to use Shrek as a library can be found in the
+[examples](./examples) directory.
 
 # In active development
 
@@ -115,24 +119,25 @@ There are optimizations that could be made to Shrek to improve its performance. 
 are welcome and encouraged. Feel free to open an issue/discussion to share your thoughts and
 ideas, or submit a pull request with your optimization.
 
-The primary goal of Shrek is to be an easy to use Go program/library for Go developers,
-not to be the fastest program out there. It should be able to run on every platform that
-Go supports. Use of `cgo` or other complicated build processes should be avoided.
+The primary goal of Shrek is to be an easy to use CLI program for regular users and
+library for Go developers, not to be the fastest program out there. It should be able
+to run on every major platform that Go supports. Use of `cgo` or other complicated
+build processes should be avoided.
 
 # FAQ
 
 ## Are v2 addresses supported?
 
-No. They were already deprecated at the time Shrek was written, so there didn't seem any
-point supporting them. There are no plans to add it as a feature.
+No. They were already deprecated at the time Shrek was first released, so there didn't
+seem any point supporting them. There are no plans to add them as a feature.
 
 ## Can I run Shrek without all the emojis, extra colors, and other fancy formatting?
 
-Sure. Use the `--format basic` flag when running the program to keep things simple. You
-can also run `shrek --help` to see a list of all possible formatting options; maybe you'll
-find one you like.
+Sure. Use the `--format basic` flag when running the program to keep things simple.
+You can also run `shrek --help` to see a list of all possible formatting options;
+maybe you'll find one you like.
 
-## How do I use a generated address with the `cretz/bine` Tor library?
+## How do I use a generated address with the [`cretz/bine`][ghbine-page] Tor library?
 
 There are [example projects](./examples) that show how to use Shrek and Bine together.
 
@@ -140,7 +145,7 @@ But to put it simply, all you need to do is convert Shrek's `OnionAddress` into 
 `KeyPair`. See this code example:
 
 <details>
-  <summary>Click to expand answer</summary>
+  <summary>Click to expand code snippet.</summary>
 
 ```go
 package main
@@ -180,25 +185,29 @@ func main() {
 
 Onions have layers, ogres have layers.
 
+_This project has no affiliation with the creators of the Shrek franchise. It's just a
+pop culture reference joke._
+
 # License
 
 Shrek is distributed under the terms of the MIT License (see [LICENSE](LICENSE)).
 
 
 <!-- Link refs -->
-[goref-badge]: <https://img.shields.io/badge/-reference-007d9c?style=for-the-badge&logo=go&labelColor=5c5c5c&logoColor=ffffff> "Go pkg.dev badge"
+[goref-badge]: <https://img.shields.io/badge/-reference-007d9c?style=for-the-badge&logo=go&labelColor=5c5c5c&logoColor=ffffff>
 [goref-page]: <https://pkg.go.dev/github.com/innix/shrek> "Go pkg.dev"
 
-[ghrel-badge]: <https://img.shields.io/github/v/release/innix/shrek?display_name=tag&sort=semver&style=for-the-badge> "GitHub Releases badge"
+[ghrel-badge]: <https://img.shields.io/github/v/release/innix/shrek?display_name=tag&sort=semver&style=for-the-badge>
 [ghrel-page]: <https://github.com/innix/shrek/releases> "GitHub Releases"
 
-[gorep-badge]: <https://goreportcard.com/badge/github.com/innix/shrek?style=for-the-badge&logo=go> "Go Report badge"
+[gorep-badge]: <https://goreportcard.com/badge/github.com/innix/shrek?style=for-the-badge&logo=go>
 [gorep-page]: <https://goreportcard.com/report/github.com/innix/shrek> "Go Report"
 
-[gover-badge]: <https://img.shields.io/github/go-mod/go-version/innix/shrek?style=for-the-badge&logo=go> "Go Version badge"
+[gover-badge]: <https://img.shields.io/github/go-mod/go-version/innix/shrek?style=for-the-badge&logo=go>
 [gover-page]: <go.mod> "Go Version"
 
-[licen-badge]: <https://img.shields.io/github/license/innix/shrek?style=for-the-badge> "Project License badge"
+[licen-badge]: <https://img.shields.io/github/license/innix/shrek?style=for-the-badge>
 [licen-page]: <LICENSE> "Project License"
 
 [mkp224o-page]: <https://github.com/cathugger/mkp224o> "cathugger/mkp224o - GitHub page"
+[ghbine-page]: <https://github.com/cretz/bine/> "cretz/bine - GitHub page"
